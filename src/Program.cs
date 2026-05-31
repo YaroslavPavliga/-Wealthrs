@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Globalization;
+using System.Text; // ДОДАНО: Для роботи з UTF-8 кодуванням
 using System.Collections.Generic;
 
 namespace Wealthrs
@@ -11,6 +12,10 @@ namespace Wealthrs
 
         static void Main(string[] args)
         {
+            // ДОДАНО: Змушуємо Windows CMD коректно відображати українську кирилицю замість знаків питання ????
+            Console.OutputEncoding = Encoding.UTF8;
+            Console.InputEncoding = Encoding.UTF8;
+
             while (true)
             {
                 Console.Clear();
@@ -58,7 +63,6 @@ namespace Wealthrs
             while (true)
             {
                 Console.Clear();
-                // ВИПРАВЛЕНО: Додано пункт 3 для вилучення з подушки
                 Console.WriteLine("0. Назад | 1. Обов'язкова витрата | 2. Необов'язкова витрата | 3. Вилучення з подушки | 8. Видалити | 9. Календар");
                 Console.WriteLine("--------------------------------------------------------------------------------------------");
                 
@@ -71,7 +75,7 @@ namespace Wealthrs
                 {
                     case "1": AddEntry("Витрата", "Обов'язкова"); break;
                     case "2": AddEntry("Витрата", "Необов'язкова"); break;
-                    case "3": AddEntry("Витрата", "Подушка"); break; // ВИПРАВЛЕНО: тепер можна вносити!
+                    case "3": AddEntry("Витрата", "Подушка"); break;
                     case "8": DeleteEntryFlow("Витрата"); break;
                     case "9": RunCalendar(false); break;
                 }
@@ -115,7 +119,7 @@ namespace Wealthrs
         {
             Console.Clear();
             Console.WriteLine("=========================================================");
-            Console.WriteLine("                НАЛАШТУВАННЯ ВІДСОТКІВ                  ");
+            Console.WriteLine("                 НАЛАШТУВАННЯ ВІДСОТКІВ                  ");
             Console.WriteLine("=========================================================");
             Console.WriteLine($"1. Подушка безпеки:      {manager.CushionPct}%");
             Console.WriteLine($"2. Інвестиції:           {manager.InvestPct}%");
@@ -172,7 +176,6 @@ namespace Wealthrs
             }
             else
             {
-                // ВИПРАВЛЕНО: Додано варіант 3 для видалення витрат з Подушки
                 Console.WriteLine("Оберіть категорію: 1-Обов'язкова витрата, 2-Необов'язкова витрата, 3-Подушка");
                 category = (Console.ReadLine() ?? "") switch { "1" => "Обов'язкова", "2" => "Необов'язкова", "3" => "Подушка", _ => "" };
             }
@@ -240,7 +243,7 @@ namespace Wealthrs
             Console.ReadKey();
         }
 
-        static DateTime ParseDate(string p)
+        static void ParseDate(string p)
         {
             while (true) {
                 Console.Write(p);
