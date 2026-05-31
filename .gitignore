@@ -1,0 +1,13 @@
+# Службові папки компілятора .NET
+bin/
+obj/
+
+# Налаштування середовища розробки (VS Code / Codespaces)
+.vscode/
+.vs/
+*.user
+*.suo
+
+# Файл з вашими особистими фінансовими даними (база даних програми)
+wealth_data.json
+wealth_data_backup.json
