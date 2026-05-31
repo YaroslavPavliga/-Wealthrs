@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Globalization;
-using System.Text; // ДОДАНО: Для роботи з UTF-8 кодуванням
+using System.Text; 
 using System.Collections.Generic;
 
 namespace Wealthrs
@@ -12,7 +12,7 @@ namespace Wealthrs
 
         static void Main(string[] args)
         {
-            // ДОДАНО: Змушуємо Windows CMD коректно відображати українську кирилицю замість знаків питання ????
+            // Змушуємо Windows CMD коректно відображати українську кирилицю замість знаків питання ????
             Console.OutputEncoding = Encoding.UTF8;
             Console.InputEncoding = Encoding.UTF8;
 
@@ -243,7 +243,7 @@ namespace Wealthrs
             Console.ReadKey();
         }
 
-        static void ParseDate(string p)
+        static DateTime ParseDate(string p)
         {
             while (true) {
                 Console.Write(p);
