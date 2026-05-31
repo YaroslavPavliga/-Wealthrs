@@ -12,9 +12,10 @@ namespace Wealthrs
 
         static void Main(string[] args)
         {
-            // Змушуємо Windows CMD коректно відображати українську кирилицю замість знаків питання ????
-            Console.OutputEncoding = Encoding.UTF8;
-            Console.InputEncoding = Encoding.UTF8;
+            // ВИПРАВЛЕННЯ: Використовуємо Encoding.Unicode замість UTF8, 
+            // щоб cmd.exe не повертав порожній рядок при введенні кирилиці через ReadLine.
+            Console.OutputEncoding = Encoding.Unicode;
+            Console.InputEncoding = Encoding.Unicode;
 
             while (true)
             {
