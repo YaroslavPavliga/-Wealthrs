@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Linq;
 using System.Globalization;
 using System.Text; 
@@ -21,7 +21,7 @@ namespace Wealthrs
             {
                 Console.Clear();
                 Console.WriteLine("==============================");
-                Console.WriteLine("          WealthRS            ");
+                Console.WriteLine("          Wealthrs            ");
                 Console.WriteLine("==============================");
                 Console.WriteLine("1. Надходження\n2. Витрати\n3. Розподіл надходжень\n4. Вихід");
                 Console.Write("\nДія: ");

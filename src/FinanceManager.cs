@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using System.Net.Http;
 using System.Globalization;
 
 namespace Wealthrs
@@ -22,9 +21,6 @@ namespace Wealthrs
         private const string FilePath = "wealth_data.json";
         private AppData _appData;
         
-        public double UsdRate { get; private set; } = 43.97;
-        public double EurRate { get; private set; } = 48.89;
-        
         public int ViewMonth { get; set; } = DateTime.Now.Month;
         public int ViewYear { get; set; } = DateTime.Now.Year;
         
@@ -36,32 +32,13 @@ namespace Wealthrs
         public FinanceManager()
         {
             _appData = LoadData();
-            UpdateRates();
+            
             if (_appData.Transactions.Any())
             {
                 var latest = _appData.Transactions.Max(t => t.StartDate);
                 ViewMonth = latest.Month;
                 ViewYear = latest.Year;
             }
-        }
-
-        private void UpdateRates()
-        {
-            try
-            {
-                using HttpClient client = new HttpClient();
-                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
-                string json = client.GetStringAsync("https://bank.gov.ua/NBUStatService/v1/statistix/exchange?json").GetAwaiter().GetResult();
-                using JsonDocument doc = JsonDocument.Parse(json);
-                foreach (JsonElement element in doc.RootElement.EnumerateArray())
-                {
-                    string cc = element.GetProperty("cc").GetString() ?? "";
-                    double rate = element.GetProperty("rate").GetDouble();
-                    if (cc == "USD") UsdRate = rate;
-                    if (cc == "EUR") EurRate = rate;
-                }
-            }
-            catch { }
         }
 
         public void AddTransaction(Transaction t)
@@ -95,7 +72,6 @@ namespace Wealthrs
             Console.WriteLine($"==========================================================================================");
         }
 
-        // Нова утиліта захисту від різних типів апострофів
         private bool NormalizeAndCompare(string? source, string target)
         {
             if (source == null) return false;
@@ -156,15 +132,12 @@ namespace Wealthrs
                 DateTime currentDay = dayGroup.Key;
                 var dayIncomes = dayGroup.Where(t => NormalizeAndCompare(t.Type, "Надходження") && !NormalizeAndCompare(t.Category, "Подушка")).ToList();
                 var dayMandatoryExpenses = dayGroup.Where(t => NormalizeAndCompare(t.Type, "Витрата") && NormalizeAndCompare(t.Category, "Обов'язкова")).ToList();
-                
-                // Додано збір необов'язкових витрат для поточного дня
                 var dayOptionalExpenses = dayGroup.Where(t => NormalizeAndCompare(t.Type, "Витрата") && NormalizeAndCompare(t.Category, "Необов'язкова")).ToList();
 
                 decimal totalDayIncome = dayIncomes.Sum(t => t.Amount);
                 decimal totalDayMandatory = dayMandatoryExpenses.Sum(t => t.Amount);
                 decimal totalDayOptional = dayOptionalExpenses.Sum(t => t.Amount);
 
-                // Оновлено умову пропуску дня (якщо є хоч якийсь рух — день відображається)
                 if (totalDayIncome == 0 && totalDayMandatory == 0 && totalDayOptional == 0) continue;
 
                 Console.WriteLine($"\n 📅 [ {currentDay:dd.MM.yyyy} ] ──────────────────────────────────────────────────────────");
@@ -191,7 +164,6 @@ namespace Wealthrs
                         Console.WriteLine($"     ➔ Спонтанні покупки ({SpontaneousPct}%): {spontaneous:F0} ₴");
                         Console.WriteLine($"     ➔ Вільні гроші ({FreePct}%): {free:F0} ₴");
 
-                        // Візуалізація списань на необов'язкові витрати з розподілених коштів
                         if (totalDayOptional > 0)
                         {
                             Console.WriteLine($"     📉 Витрачено на необов'язкові цілі: -{totalDayOptional:F0} ₴ ({string.Join(", ", dayOptionalExpenses.Select(o => o.Details))})");
@@ -223,7 +195,6 @@ namespace Wealthrs
                         Console.ResetColor();
                     }
                     
-                    // Якщо доходу й обов'язкових витрат не було, але була необов'язкова витрата
                     if (totalDayOptional > 0)
                     {
                         Console.WriteLine($"   🛒 Необов'язкові витрати дня: {totalDayOptional:F0} ₴ ({string.Join(", ", dayOptionalExpenses.Select(o => o.Details))})");
@@ -251,7 +222,7 @@ namespace Wealthrs
                 Console.WriteLine($" 🚨 СИГНАЛ: ВИЯВЛЕНО ДЕФІЦИТ ФІНАНСОВОЇ ПОДУШКИ!");
                 Console.WriteLine($"    Всього запозичено календарем:     {totalAutoCushionDebt:F0} ₴");
                 Console.WriteLine($"    Повернуто вами за цей місяць:     {totalCushionRepaid:F0} ₴");
-                Console.WriteLine($"    АКТУАЛЬНИЙ БОРГ ДО П ПОВЕРНЕННЯ:  {finalDebt:F0} ₴");
+                Console.WriteLine($"    АКТУАЛЬНИЙ БОРГ ДО ПОВЕРНЕННЯ:  {finalDebt:F0} ₴");
                 Console.WriteLine($"    [!] Щоб закрити борг, внесіть будь-яке надходження з категорією \"Подушка\"");
                 Console.ResetColor();
             }
@@ -270,7 +241,6 @@ namespace Wealthrs
 
         public void PrintTable(List<Transaction> list, string category)
         {
-            // Використання нормалізованого порівняння замість строгого ==
             var filtered = list.Where(x => NormalizeAndCompare(x.Category, category)).ToList();
             if (!filtered.Any()) { Console.WriteLine("   -- Немає записів --"); return; }
             
